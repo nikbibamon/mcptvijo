@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Почему ваш MCP-сервер не видно — и что действительно работает</title>
+<meta name="description" content="Разбор на фактах: как работают два реестра MCP, что реально тормозит листинг, как писать инструменты, которые агент выберет, и как добиться цитирования, а не просто индексации.">
+<meta property="og:title" content="Почему ваш MCP-сервер не видно — и что действительно работает">
+<meta property="og:description" content="Два реестра, одни ручные ворота. Что проверить в заявке, как проектировать инструменты и почему цитирование не равно ранжированию.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div>
+<a class="lang" href="index.html" hreflang="en" lang="en">🇬🇧 English version</a>
+
+<header class="hero wrap">
+  <span class="eyebrow">🎓 Полевое руководство · обновлено 29.10.2026</span>
+  <h1>Ваш MCP-сервер не спрятан.<br><span class="rainbow-text">Он в чьей-то очереди.</span></h1>
+  <p class="lead">
+    Всё ниже — из двух источников: что на самом деле отвечают реестры и что писали
+    публично сами мейнтейнеры, пока ждали. Без «10x установок» и без обещаний листинга,
+    которого никто в GitHub не обещал.
+  </p>
+  <ul class="chips">
+    <li>🧱 Как устроены реестры</li>
+    <li>🧰 Инструменты, которые агент выберет</li>
+    <li>💸 Деньги в цикле агента</li>
+    <li>📣 Цитирование вместо ранжирования</li>
+    <li>🎨 UX документации</li>
+  </ul>
+</header>
+
+<main>
+
+<section class="wrap" id="gate">
+  <h2><span class="num">01</span> 🎯 Ворота, которые не баг</h2>
+  <p>
+    Реестров два, и ведут они себя по-разному. Публикация в открытом — самообслуживание.
+    Попадание в реестр GitHub (тот, что кормит галерею MCP в VS Code) — <strong>ручной шаг
+    курации, который делает GitHub</strong>.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <caption>Наблюдаемое поведение двух реестров</caption>
+      <thead><tr><th scope="col"></th><th scope="col">Открытый реестр</th><th scope="col">Реестр GitHub</th></tr></thead>
+      <tbody>
+        <tr><td>Адрес</td><td><code>registry.modelcontextprotocol.io</code></td><td><code>github.com/mcp</code> · <code>api.mcp.github.com</code></td></tr>
+        <tr><td>Публикация</td><td>Автоматическая, сразу</td><td>Ручная курация</td></tr>
+        <tr><td>Версии после первого принятия</td><td>—</td><td>Синхронизируются сами</td></tr>
+        <tr><td>Опубликованные критерии</td><td>Валидность схемы</td><td>Не опубликованы</td></tr>
+        <tr><td>Опубликованный срок</td><td>Сразу</td><td>Нет</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <blockquote>
+    реестр GitHub теперь умеет синхронизировать версии из открытого реестра, но добавление
+    нового сервера по-прежнему остаётся ручной курацией.
+    <footer>— сотрудник GitHub, <a href="https://github.com/github/github-mcp-server/discussions/1257">обсуждение #1257</a>, май 2026</footer>
+  </blockquote>
+
+  <div class="stats">
+    <div class="stat"><span class="v rainbow-text">347</span><span class="k">комментариев в одном треде онбординга</span><span class="src">#1257, 29.10.2026</span></div>
+    <div class="stat"><span class="v rainbow-text">327</span><span class="k">участников в этой очереди</span><span class="src">#1257, 29.10.2026</span></div>
+    <div class="stat"><span class="v rainbow-text">~8 мес</span><span class="k">от заявки до листинга у первого попавшего</span><span class="src">#1257: 19.10.2025 → 30.06.2026</span></div>
+    <div class="stat"><span class="v rainbow-text">0</span><span class="k">результатов по нашему серверу на стороне GitHub</span><span class="src"><code>api.mcp.github.com</code>, 29.10.2026</span></div>
+  </div>
+
+  <div class="callout">
+    <span class="ico">🧊</span>
+    <div><p><strong>Холодная правда.</strong> Невидимость в галерее — состояние по умолчанию,
+    а не дефект кода. Это не значит «плохо написан» или «отклонили». Это значит, что человек
+    ещё не посмотрел.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="entry">
+  <h2><span class="num">02</span> 🧱 Заявка, которая переживёт куратора</h2>
+  <p class="muted">
+    Ускорить очередь нельзя. Можно убрать все причины пропустить вас, когда очередь дойдёт.
+    Это реальные блокеры из заявок, опубликованных 28–29.10.2026.
+  </p>
+
+  <ul class="check">
+    <li><span class="tick">✓</span><div class="body"><strong><code>server.json</code> проходит текущую схему</strong><span>И <code>name</code> совпадает с namespace, которым вы владеете: GitHub-организация или домен с DNS-подтверждением.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Поле <code>repository</code> или манифест вместо него</strong><span>Два мейнтейнера сами написали в заявке, что поля нет. Куратору нечего проверять.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong><code>isLatest: true</code> и версия, совпадающая с пакетом</strong><span>Устаревшая версия в указателе latest читается как заброшенный проект.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Аннотации у каждого инструмента</strong><span><code>title</code>, <code>readOnlyHint</code>, <code>destructiveHint</code>, <code>openWorldHint</code>. Без них клиент не спросит подтверждение перед записью.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Понятная проверяемая авторизация</strong><span>Удалённые: OAuth 2.1 + PKCE, метаданные защищённого ресурса, динамическая регистрация клиента. Bearer-ключ, вставленный в конфиг, проверить нельзя.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Публичное доказательство эндпоинта</strong><span>Неавторизованный <code>curl</code>, вернувший 401 с <code>WWW-Authenticate</code>, сильнее скриншота.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Одно предложение о пользе для человека</strong><span>«Управляйте задачами» — категория. «Отмените запущенную задачу до следующего списания» — причина.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Видимая строка «чего сервер не делает»</strong><span>Самый дешёвый сигнал доверия и первое, что проверяют.</span></div></li>
+  </ul>
+
+  <div class="callout warn">
+    <span class="ico">⚠️</span>
+    <div><p><strong>Не переотправляйте заявку.</strong> В том треде один мейнтейнер «поднимал»
+    её восемь месяцев. Листинг появился после того, как заявку взял человек, а не после
+    напоминания. Напоминания добавляют шум в очередь, которую читают люди.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="tools">
+  <h2><span class="num">03</span> 🧰 Инструменты, которые агент сможет выбрать</h2>
+  <p>
+    Описание инструмента — это не документация для людей. Это вся поверхность решения для
+    модели, которой нужно выбрать один ваш инструмент или ни одного.
+  </p>
+  <div class="grid two">
+    <article class="card"><span class="emoji">🎯</span><h3>Одна задача на инструмент</h3><p>Если в названии нужно «и» — это два инструмента. Агент угадает не ту половину, и обязательно в дорогой части.</p></article>
+    <article class="card"><span class="emoji">🏷️</span><h3>Глагол + предметная область</h3><p><code>tvijo_review</code> лучше <code>process</code>. Имя — первый токен, который видит модель, и часто единственный, по которому она ранжирует.</p></article>
+    <article class="card"><span class="emoji">🔒</span><h3>Строгие схемы</h3><p>Отклоняйте неизвестные поля, а не игнорируйте. Молча проигнорированное поле — это неверное действие, которого пользователь не увидит.</p></article>
+    <article class="card"><span class="emoji">📦</span><h3>Ограниченный вывод</h3><p>Ограничивайте байты, строки и свежесть. Неограниченный ответ — бомба для контекста, а виноват будет ваш сервер.</p></article>
+    <article class="card"><span class="emoji">🙈</span><h3>Неизвестно — это не ноль</h3><p>Если сумма неизвестна, верните <code>null</code>. Ноль превращает неизвестный счёт в фальшивую квитанцию.</p></article>
+    <article class="card"><span class="emoji">🧯</span><h3>Ошибка — это контент</h3><p>У каждой ошибки стабильный код и фраза «что делать дальше». «Что-то пошло не так» запускает невидимый цикл повторов.</p></article>
+  </div>
+</section>
+
+<section class="wrap" id="money">
+  <h2><span class="num">04</span> 💸 Деньги в цикле агента</h2>
+  <p>Как только инструмент умеет тратить, интерфейс меняется. Агент с платным инструментом и без лимита — это баг-репорт, к которому потом приложат счёт.</p>
+  <ul class="steps">
+    <li><strong>Лимит обязателен на каждый вызов.</strong> Никакого «по умолчанию», который тратит без числа от вызывающего. Нет числа — отказ.</li>
+    <li><strong>Зажимать, а не договариваться.</strong> Потолок на вызов. Выше потолка — отказ <em>до</em> сетевого запроса, чтобы баг стоил ноль.</li>
+    <li><strong>Никаких автоповторов платного вызова.</strong> Неоднозначность решается чтением по ключу идемпотентности, а не второй попыткой.</li>
+    <li><strong>Цена рядом с ответом.</strong> Ревью, которое не сообщает свою стоимость, невозможно бюджетировать.</li>
+    <li><strong>Говорить «неизвестно» вслух.</strong> Восстановленный ответ может нести <code>spent_usd: null</code>. Это честно и это не ноль.</li>
+  </ul>
+  <pre><code>{ "prompt": "Explain how to make this function easier to test.",
+  "max_usd": 0.25 }</code></pre>
+</section>
+
+<section class="wrap" id="ux">
+  <h2><span class="num">05</span> 🎨 UX документации для инструментов разработчика</h2>
+  <p class="muted">Документация — это интерфейс. Эти пять правил поймали у нас больше реальных проблем, чем любой редизайн.</p>
+  <div class="grid two">
+    <article class="card rainbow"><span class="emoji">🪜</span><h3>1 · Постепенное раскрытие</h3><p>Первый экран отвечает: «я смогу этим воспользоваться за пять минут?». Схемы, крайние случаи и коды ошибок — уровнем ниже, по ссылке. Страница, которая начинается с архитектуры, теряет всех, кто ещё решал.</p></article>
+    <article class="card rainbow"><span class="emoji">📋</span><h3>2 · Сначала копипаста</h3><p>Рабочий блок конфигурации — раньше объяснения конфигурации. Если конфиг надо собирать из трёх разделов, три из них будут неверными.</p></article>
+    <article class="card rainbow"><span class="emoji">❓</span><h3>3 · Тест трёх вопросов</h3><p>Сможет ли посторонний ответить: что это делает, сколько стоит, что сломается? Нет ответа хотя бы на один — страница не готова, как бы красиво ни выглядела.</p></article>
+    <article class="card rainbow"><span class="emoji">🔎</span><h3>4 · Видимое состояние</h3><p>Показывайте состояние, а не описывайте: версию, вход, остаток лимита. Кто видит состояние — не гадает и не пишет в поддержку.</p></article>
+    <article class="card rainbow"><span class="emoji">🧭</span><h3>5 · Один путь и названные выходы</h3><p>Один рекомендованный маршрут. Альтернативные клиенты и ручная настройка — это выходы с маршрута, а не параллельные туннели в начале.</p></article>
+    <article class="card rainbow"><span class="emoji">🧾</span><h3>Бонус · Квитанции вместо прилагательных</h3><p>«Быстро» — прилагательное. «0.2.0 опубликована, реестр <code>active</code>, галерея <code>count: 0</code>, замер 29.10.2026» — квитанция. Квитанции переживают ревью.</p></article>
+  </div>
+</section>
+
+<section class="wrap" id="aeo">
+  <h2><span class="num">06</span> 📣 Цитирование, а не ранжирование</h2>
+  <p>Поиск ранжирует страницы. Ассистент цитирует предложения. Единица работы — утверждение с источником и датой, а не ключевое слово.</p>
+  <ul class="check">
+    <li><span class="tick">1</span><div class="body"><strong>Ответ в первом абзаце</strong><span>Поднимают первый самодостаточный ответ. Преамбула — мёртвый вес.</span></div></li>
+    <li><span class="tick">2</span><div class="body"><strong>Одно число, одно определение, одна дата</strong><span>Одна величина на двух страницах — одно определение и ссылка между ними. Разные подписи без пути — дефект, даже если оба числа верны.</span></div></li>
+    <li><span class="tick">3</span><div class="body"><strong>Покажите метод</strong><span>Команда, эндпоинт, версия. Утверждение, которое нельзя воспроизвести, цитировать нельзя.</span></div></li>
+    <li><span class="tick">4</span><div class="body"><strong>Всегда «когда это НЕ работает»</strong><span>Граница — самое полезное предложение на странице, и конкуренты его обычно вырезают.</span></div></li>
+    <li><span class="tick">5</span><div class="body"><strong>Структура, которую можно выдернуть</strong><span>Один <code>H1</code>, <code>H2</code> в форме вопросов, таблицы для сравнений, FAQ с настоящими вопросами, JSON-LD, <code>llms.txt</code>.</span></div></li>
+    <li><span class="tick">6</span><div class="body"><strong>Публикуйте отрицательный результат</strong><span>Разбор отбракованного эксперимента цитируют чаще, чем ещё одну историю успеха: почти никто так не делает.</span></div></li>
+  </ul>
+  <div class="callout">
+    <span class="ico">🪞</span>
+    <div><p><strong>Правило второго прохода.</strong> Если вердикт слишком точно совпадает с
+    формулировкой вопроса — проверьте другим инструментом. Три модели, согласные в одном
+    неверном прочтении, согласны уверенно.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="loop">
+  <h2><span class="num">07</span> 📈 Единственный цикл, который стоит крутить</h2>
+  <ul class="steps">
+    <li><strong>Запись корректна.</strong> Схема, репозиторий, аннотации, честное описание. Пока это не так, остальное неважно.</li>
+    <li><strong>Установка — пять минут.</strong> Одна команда, один блок конфигурации, одно видимое состояние. Измерьте, сколько это занимает у постороннего.</li>
+    <li><strong>Первый вызов возвращает квитанцию.</strong> Стоимость, id задачи, состояние. Квитанция — это продукт, а не деталь.</li>
+    <li><strong>Публичная страница отвечает на вопрос, который наберут.</strong> С датами, источниками и собственными ограничениями.</li>
+    <li><strong>Кто-то повторяет это публично.</strong> Не ваш отзыв, а их фраза, потому что лимит сработал ровно как обещано.</li>
+  </ul>
+</section>
+
+<section class="wrap" id="limits">
+  <h2><span class="num">08</span> ⚠️ Когда это НЕ работает</h2>
+  <div class="grid two">
+    <article class="card"><span class="emoji">🚫</span><h3>Когда галерея нужна завтра</h3><p>Не получится. Это ручные ворота без сроков. Если запуск зависит от листинга — он уже не запланирован. Ручная установка и есть основной путь.</p></article>
+    <article class="card"><span class="emoji">🧲</span><h3>Когда продукт — это листинг</h3><p>Если видимость и есть вся ценность, у сервера нет своей работы. Это заметит и куратор, и первый установивший.</p></article>
+    <article class="card"><span class="emoji">🕳️</span><h3>Когда нечего показать кроме «работает»</h3><p>Нет версии, эндпоинта, датированной проверки — нет и утверждения. Страница из этого не будет цитироваться.</p></article>
+    <article class="card"><span class="emoji">🔁</span><h3>Когда цикл — на самом деле баг-репорт</h3><p>Если люди отваливаются на установке, AEO не поможет. Сначала установка: страница только усиливает то, что уже есть.</p></article>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="cta">
+    <h2>Нужен аудит вашего сервера?</h2>
+    <p class="muted">Бесплатно, детерминированно, PASS / FAIL / NOT_RUN по каждому пункту с командой, которая это дала. Листинг не обещаем — он не в нашей власти.</p>
+    <a class="btn" href="https://github.com/nikbibamon/mcptvijo/issues/new">Оставить заявку на аудит</a>
+    <a class="btn ghost" href="https://github.com/nikbibamon/mcptvijo/blob/main/docs/registry-status.md">Доказательства по реестрам</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="site wrap">
+  <p>
+    <span translate="no">Tvijo</span> · публичный хаб продукта ·
+    <a href="https://github.com/nikbibamon/mcptvijo">репозиторий</a> ·
+    <a href="https://www.npmjs.com/package/tvijo-dshrem-mcp">npm</a> ·
+    <a href="https://registry.modelcontextprotocol.io/v0.1/servers/com.tvijo%2Fdshrem/versions/latest">запись в реестре</a>
+  </p>
+  <p class="small">Каждое число на странице датировано и воспроизводимо. Где замера нет, написано «не измерено», а не придумано значение.</p>
+</footer>
+</body>
+</html>

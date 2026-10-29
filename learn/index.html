@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why your MCP server is invisible — and what actually works</title>
+<meta name="description" content="A dated, evidence-based guide to MCP registry curation, tool design an agent can use, spending caps in an agent loop, and being quoted by assistants. Written from measurements, not opinions.">
+<meta property="og:title" content="Why your MCP server is invisible — and what actually works">
+<meta property="og:description" content="Two registries, one manual gate. What blocks a listing, how to write tools an agent can choose, and how to be cited instead of scrolled past.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div>
+<a class="lang" href="index.ru.html" hreflang="ru" lang="ru">🇷🇺 Русская версия</a>
+
+<header class="hero wrap">
+  <span class="eyebrow">🎓 Field guide · updated 2026-10-29</span>
+  <h1>Your MCP server isn't hidden.<br><span class="rainbow-text">It's in someone's queue.</span></h1>
+  <p class="lead">
+    Everything below comes from two places: what the registries actually return, and what
+    server maintainers wrote in public while waiting. No growth hacks, no "10x your installs",
+    no promises about a listing nobody at GitHub has promised.
+  </p>
+  <ul class="chips">
+    <li>🧱 Registry mechanics</li>
+    <li>🧰 Tool design for agents</li>
+    <li>💸 Money in an agent loop</li>
+    <li>📣 Being quoted, not ranked</li>
+    <li>🎨 Docs UX that survives contact</li>
+  </ul>
+</header>
+
+<main>
+
+<!-- 1 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="gate">
+  <h2><span class="num">01</span> 🎯 The gate that isn't a bug</h2>
+  <p>
+    There are two registries and they behave nothing alike. Publishing to the open one is
+    self-service. Getting into GitHub's — the one that feeds the VS Code MCP gallery — is a
+    <strong>manual curation step performed by GitHub</strong>.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <caption>Observed behaviour of the two registries</caption>
+      <thead>
+        <tr><th scope="col"></th><th scope="col">Open registry</th><th scope="col">GitHub registry</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Address</td><td><code>registry.modelcontextprotocol.io</code></td><td><code>github.com/mcp</code> · <code>api.mcp.github.com</code></td></tr>
+        <tr><td>Publication</td><td>Automated, immediate</td><td>Manual curation</td></tr>
+        <tr><td>Versions after first accept</td><td>—</td><td>Sync automatically</td></tr>
+        <tr><td>Published criteria</td><td>Schema validity</td><td>Not published</td></tr>
+        <tr><td>Published ETA</td><td>Immediate</td><td>None</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <blockquote>
+    the GitHub MCP Registry now has the ability to sync versions from the open source
+    registry, but onboarding a new server is still a manual curation process today.
+    <footer>— GitHub collaborator, <a href="https://github.com/github/github-mcp-server/discussions/1257">discussion #1257</a>, May 2026</footer>
+  </blockquote>
+
+  <div class="stats">
+    <div class="stat"><span class="v rainbow-text">347</span><span class="k">comments in one onboarding thread</span><span class="src">#1257, 2026-10-29</span></div>
+    <div class="stat"><span class="v rainbow-text">327</span><span class="k">participants queuing in that thread</span><span class="src">#1257, 2026-10-29</span></div>
+    <div class="stat"><span class="v rainbow-text">~8 mo</span><span class="k">request → listing for the first server that got in</span><span class="src">#1257: 2025-10-19 → 2026-06-30</span></div>
+    <div class="stat"><span class="v rainbow-text">0</span><span class="k">results for our own server on the GitHub side</span><span class="src"><code>api.mcp.github.com</code>, 2026-10-29</span></div>
+  </div>
+
+  <div class="callout">
+    <span class="ico">🧊</span>
+    <div>
+      <p><strong>Cold truth.</strong> Being invisible in the gallery is the default state, not a
+      defect in your code. It does not mean your server is broken, badly written or rejected.
+      It means a human has not looked at it yet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="entry">
+  <h2><span class="num">02</span> 🧱 The entry that survives a curator</h2>
+  <p class="muted">
+    You cannot speed up the queue. You can remove every reason to skip you when your turn comes.
+    These are the items that appeared as actual blockers in requests published between
+    2026-10-28 and 2026-10-29.
+  </p>
+
+  <ul class="check">
+    <li><span class="tick">✓</span><div class="body"><strong><code>server.json</code> validates against the current schema</strong><span>And its <code>name</code> matches a namespace you actually own: a GitHub org, or a DNS-verified domain.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>A <code>repository</code> field, or a manifest that replaces it</strong><span>Two maintainers wrote in their own request that the field was missing. A curator with no source has nothing to check.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong><code>isLatest: true</code> and a version that matches the package</strong><span>A superseded version at the latest pointer reads as an abandoned project.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Annotations on every tool</strong><span><code>title</code>, <code>readOnlyHint</code>, <code>destructiveHint</code>, <code>openWorldHint</code>. Without them a client cannot prompt safely before a write.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>An auth shape a reviewer recognises</strong><span>Remote servers: OAuth 2.1 + PKCE, protected-resource metadata, dynamic client registration. A bearer key pasted into config is not reviewable.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>Public endpoint evidence</strong><span>An unauthenticated <code>curl</code> that returns 401 with <code>WWW-Authenticate</code> beats any screenshot.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>One sentence that says what it does for a person</strong><span>"Manage your tasks" is a category. "Cancel a running job before the next billing interval" is a reason.</span></div></li>
+    <li><span class="tick">✓</span><div class="body"><strong>A visible "what it does not do" line</strong><span>It is the cheapest trust signal you have, and the one reviewers check first.</span></div></li>
+  </ul>
+
+  <div class="callout warn">
+    <span class="ico">⚠️</span>
+    <div>
+      <p><strong>Do not re-post your request.</strong> In that thread, one maintainer bumped
+      repeatedly for eight months. The listing arrived after a curator picked it up — not after
+      a bump. Repeated asks add noise to a queue that is read by humans, and noise is the
+      opposite of signal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="tools">
+  <h2><span class="num">03</span> 🧰 Tools an agent can actually choose</h2>
+  <p>
+    A tool description is not documentation for humans. It is the entire decision surface for a
+    model that must pick one of your tools, or none. Write it for the model, and it stays
+    readable for people as a side effect.
+  </p>
+
+  <div class="grid two">
+    <article class="card">
+      <span class="emoji">🎯</span>
+      <h3>One job per tool</h3>
+      <p>If the name needs "and", it is two tools. An agent that must guess which half will
+      guess wrong on the expensive half.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">🏷️</span>
+      <h3>Verb-first, domain-specific names</h3>
+      <p><code>tvijo_review</code> beats <code>process</code>. The name is the first token a
+      model sees and often the only one it ranks on.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">🔒</span>
+      <h3>Strict schemas</h3>
+      <p>Reject unknown fields rather than ignore them. A silently ignored field is a wrong
+      action the user never sees.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">📦</span>
+      <h3>Bounded output</h3>
+      <p>Cap bytes, rows and age. An unbounded result is a context bomb, and it will be
+      your server that gets blamed for the truncated answer.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">🙈</span>
+      <h3>Unknown is not zero</h3>
+      <p>If you don't know the amount spent, return <code>null</code> and say so. Returning
+      <code>0</code> turns an unknown bill into a false receipt.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">🧯</span>
+      <h3>Errors are content</h3>
+      <p>Every failure gets a stable code and a sentence that tells the agent what to do next.
+      "Something went wrong" forces a retry loop you cannot see.</p>
+    </article>
+  </div>
+</section>
+
+<!-- 4 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="money">
+  <h2><span class="num">04</span> 💸 Money in an agent loop</h2>
+  <p>
+    The moment a tool can spend, the interface changes. An agent with a spend tool and no cap
+    is a bug report waiting for a bill attachment.
+  </p>
+
+  <ul class="steps">
+    <li><strong>Require the cap per call.</strong> No ambient default that spends without a
+      number supplied by the caller. If the number is missing, refuse.</li>
+    <li><strong>Clamp, don't negotiate.</strong> A session-level cap plus a hard ceiling per
+      call. Above the ceiling: reject <em>before</em> the network request, so a bug costs
+      nothing.</li>
+    <li><strong>Never auto-retry a paid call.</strong> Ambiguity is resolved by a read-only
+      lookup of the idempotency key, not by trying again and hoping.</li>
+    <li><strong>Report the price next to the answer.</strong> A review that does not say what
+      it cost is a review you cannot budget.</li>
+    <li><strong>Say "unknown" out loud.</strong> A recovered result may carry
+      <code>spent_usd: null</code>. That is honest; it is not zero.</li>
+  </ul>
+
+  <pre><code>{ "prompt": "Explain how to make this function easier to test.",
+  "max_usd": 0.25 }</code></pre>
+
+  <p class="small muted">
+    Example from <span translate="no">Tvijo DSHREM</span>: default per-call cap 1 USD, hard
+    ceiling 5 USD, paid requests never retried, tokens never returned to the model.
+  </p>
+</section>
+
+<!-- 5 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="ux">
+  <h2><span class="num">05</span> 🎨 Docs UX, applied to developer tools</h2>
+  <p class="muted">
+    Developer documentation is an interface. These five rules caught more real problems for us
+    than any redesign.
+  </p>
+
+  <div class="grid two">
+    <article class="card rainbow">
+      <span class="emoji">🪜</span>
+      <h3>1 · Progressive disclosure</h3>
+      <p>The first screen answers <em>"can I use this in five minutes"</em>. Schemas, edge cases
+      and failure codes live one level down, linked, not inline. A page that starts with
+      architecture loses everyone who was still deciding.</p>
+    </article>
+    <article class="card rainbow">
+      <span class="emoji">📋</span>
+      <h3>2 · Copy-paste first</h3>
+      <p>A working config block before the explanation of the config block. If a reader has to
+      assemble a config from three sections, three of them will be wrong.</p>
+    </article>
+    <article class="card rainbow">
+      <span class="emoji">❓</span>
+      <h3>3 · The three-question test</h3>
+      <p>Can a stranger answer: what does it do, what does it cost, what breaks? If one answer
+      is missing, the page is not finished — no matter how pretty it is.</p>
+    </article>
+    <article class="card rainbow">
+      <span class="emoji">🔎</span>
+      <h3>4 · Visible state</h3>
+      <p>Show the current state instead of describing it: version, sign-in state, remaining
+      limit. A user who can see the state stops guessing and stops writing to support.</p>
+    </article>
+    <article class="card rainbow">
+      <span class="emoji">🧭</span>
+      <h3>5 · One path, named exits</h3>
+      <p>One recommended route through the page. Alternate clients and manual setups are exits
+      from that route, not parallel tunnels at the top.</p>
+    </article>
+    <article class="card rainbow">
+      <span class="emoji">🧾</span>
+      <h3>Bonus · Receipts over adjectives</h3>
+      <p>"Fast" is an adjective. "0.2.0 published, registry <code>active</code>, gallery
+      <code>count: 0</code>, observed 2026-10-29" is a receipt. Receipts survive reviews.</p>
+    </article>
+  </div>
+</section>
+
+<!-- 6 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="aeo">
+  <h2><span class="num">06</span> 📣 Being quoted, not ranked</h2>
+  <p>
+    Search ranks pages. An assistant quotes sentences. The unit of work is a claim with a
+    source and a date — not a keyword with a density.
+  </p>
+
+  <ul class="check">
+    <li><span class="tick">1</span><div class="body"><strong>Answer in the first paragraph</strong><span>The first self-contained answer is what gets lifted. Preamble is dead weight.</span></div></li>
+    <li><span class="tick">2</span><div class="body"><strong>One number, one definition, one date</strong><span>Same quantity on two pages must mean the same thing, with a link between them. Two labels, no path, is a defect — even when both numbers are true.</span></div></li>
+    <li><span class="tick">3</span><div class="body"><strong>Make the method visible</strong><span>The command, the endpoint, the version. A claim nobody can reproduce is a claim nobody should quote.</span></div></li>
+    <li><span class="tick">4</span><div class="body"><strong>Always add "when this does not work"</strong><span>The boundary is the most useful sentence on the page, and the one competitors omit.</span></div></li>
+    <li><span class="tick">5</span><div class="body"><strong>Structure an extractor can lift</strong><span>One <code>H1</code>, question-shaped <code>H2</code>s, tables for comparisons, FAQ whose questions are the real questions, JSON-LD, <code>llms.txt</code>.</span></div></li>
+    <li><span class="tick">6</span><div class="body"><strong>Publish the negative result</strong><span>An autopsy of a culled experiment gets cited more than another success story, because almost nobody writes one.</span></div></li>
+  </ul>
+
+  <div class="callout">
+    <span class="ico">🪞</span>
+    <div>
+      <p><strong>Rule of the second pass.</strong> If a verdict matches the wording of the
+      question too neatly, check it again with a different instrument. Three models agreeing on
+      the same wrong reading agree confidently.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="loop">
+  <h2><span class="num">07</span> 📈 The only loop worth running</h2>
+  <ul class="steps">
+    <li><strong>Entry is correct.</strong> Schema, repository, annotations, honest description.
+      Nothing else matters until this is true.</li>
+    <li><strong>Install is five minutes.</strong> One command, one config block, one visible
+      state. Measure how long it actually takes a stranger.</li>
+    <li><strong>The first call returns a receipt.</strong> Cost, task id, state. The receipt is
+      the product, not a detail.</li>
+    <li><strong>A public page answers the question they will type.</strong> Dated, sourced,
+      with its own limits written down.</li>
+    <li><strong>Someone repeats it in public.</strong> Not a testimonial you wrote; a sentence
+      they wrote because the cap did what it said.</li>
+  </ul>
+</section>
+
+<!-- 8 ─────────────────────────────────────────────────────────── -->
+<section class="wrap" id="limits">
+  <h2><span class="num">08</span> ⚠️ When this does NOT work</h2>
+  <div class="grid two">
+    <article class="card">
+      <span class="emoji">🚫</span>
+      <h3>When you need the gallery tomorrow</h3>
+      <p>You can't. It is a manual gate with no published ETA. If a launch depends on it, the
+      launch is already unscheduled. Ship the manual install path as the real path.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">🧲</span>
+      <h3>When the product is the listing</h3>
+      <p>If being visible is the whole value, the server has no independent job. A curator
+      notices that, and so does the first user who installs it.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">🕳️</span>
+      <h3>When you cannot show a receipt</h3>
+      <p>No version, no endpoint, no dated check — then no claim. "It works" is not evidence,
+      and a page built from it will not be quoted.</p>
+    </article>
+    <article class="card">
+      <span class="emoji">🔁</span>
+      <h3>When the loop is actually a bug report</h3>
+      <p>If users bounce at install, no amount of AEO fixes it. Fix install first; the page
+      only amplifies what is already there.</p>
+    </article>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="cta">
+    <h2>Want the audit for your own server?</h2>
+    <p class="muted">Free, deterministic, PASS / FAIL / NOT_RUN per item, with the command that
+    produced it. No listing promises — that part is not ours to give.</p>
+    <a class="btn" href="https://github.com/nikbibamon/mcptvijo/issues/new">Open an audit request</a>
+    <a class="btn ghost" href="https://github.com/nikbibamon/mcptvijo/blob/main/docs/registry-status.md">Read the registry evidence</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="site wrap">
+  <p>
+    <span translate="no">Tvijo</span> · public product hub ·
+    <a href="https://github.com/nikbibamon/mcptvijo">repository</a> ·
+    <a href="https://www.npmjs.com/package/tvijo-dshrem-mcp">npm</a> ·
+    <a href="https://registry.modelcontextprotocol.io/v0.1/servers/com.tvijo%2Fdshrem/versions/latest">registry entry</a>
+  </p>
+  <p class="small">
+    Every number on this page is dated and reproducible. Where a measurement does not exist,
+    the page says <em>not measured</em> instead of inventing one.
+  </p>
+</footer>
+</body>
+</html>
