@@ -22,6 +22,7 @@ places to patch a spending path.
 | Open MCP Registry `com.tvijo/dshrem` | `0.2.0`, `active`, `isLatest: true` | `curl https://registry.modelcontextprotocol.io/v0.1/servers/com.tvijo%2Fdshrem/versions/latest` |
 | github.com/mcp and the VS Code MCP gallery | **not listed** — `count: 0` | `curl "https://api.mcp.github.com/v0.1/servers?search=dshrem"` |
 | Onboarding request | posted in [discussion #1257](https://github.com/github/github-mcp-server/discussions/1257#discussioncomment-19245495); acceptance **unconfirmed** | request id recorded in the Tvijo release journal |
+| Teaching page (test) | <https://tvijo.com/learn/mcp/> — `noindex` until approved | [docs/published.md](docs/published.md) |
 
 Adding a server to `github.com/mcp` is a **manual curation step performed by GitHub**
 (confirmed by a GitHub collaborator in that thread, May 2026). Publishing to the open
