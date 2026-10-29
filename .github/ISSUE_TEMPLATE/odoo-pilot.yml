@@ -1,0 +1,46 @@
+name: Odoo pilot enquiry
+description: Request a scoped evaluation using non-sensitive information only.
+title: "[Odoo pilot] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is PUBLIC. Do not provide credentials, customer exports, personal data or private URLs.
+        Ask for a private channel if needed. This enquiry does not grant ERP access or enrol you in a pilot.
+  - type: input
+    id: role
+    attributes:
+      label: Your role
+      placeholder: ERP integrator, operations, analyst, developer
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Odoo version and edition
+      placeholder: e.g. 19 Community; unknown is acceptable
+    validations:
+      required: true
+  - type: dropdown
+    id: hosting
+    attributes:
+      label: Hosting type
+      options:
+        - Unknown
+        - Odoo Online
+        - Odoo.sh
+        - Self-hosted
+  - type: textarea
+    id: scenario
+    attributes:
+      label: One business task and how you check it today
+      description: Non-sensitive summary only; no exports or credentials.
+    validations:
+      required: true
+  - type: checkboxes
+    id: visibility
+    attributes:
+      label: Public enquiry
+      options:
+        - label: I understand this issue is public and contains no sensitive data.
+          required: true
