@@ -67,6 +67,16 @@ From the thread itself and from our own review of ~30 entries posted between 202
 - The cheapest real improvement is the entry itself: schema valid, `repository` set,
   `isLatest` true, annotations on every tool, bounded output, honest error codes.
 
+## Review received, 2026-11-06
+
+GitHub reviewed the onboarding request (ticket `170697`) and asked for three changes in the
+source repository: a prominent MCP section in the root README, a named owner with an official
+support contact, and a statement near the top that a paid Tvijo account is required. All three
+are in `nikbibamon/tvijocode` `main` (`807ee4b`, PR #13). What was asked, where it was fixed and
+the reply text: [mcp-registry-review-20261106.md](mcp-registry-review-20261106.md).
+
+A review is a checkpoint, not an acceptance: the listing still has no ETA.
+
 ## When this changes
 
 If GitHub publishes curation criteria or an SLA, this page gets a new dated observation
